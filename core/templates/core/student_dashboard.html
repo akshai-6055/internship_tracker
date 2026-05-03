@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Student Dashboard</h2>
+    <a href="{% url 'student_internships' %}" class="btn btn-success">Browse Internships</a>
+    <!--<div class="mt-5 text-end">-->
+    <a href="{% url 'delete_account' %}" class="btn btn-link text-danger">Delete Account</a>
+
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-3"><div class="card text-center border-0 shadow-sm"><div class="card-body"><h4>{{ stats.total }}</h4><p class="mb-0 text-muted">Total Applied</p></div></div></div>
+    <div class="col-md-3 mb-3"><div class="card text-center text-white bg-success border-0 shadow-sm"><div class="card-body"><h4>{{ stats.accepted }}</h4><p class="mb-0">Accepted</p></div></div></div>
+    <div class="col-md-3 mb-3"><div class="card text-center text-white bg-danger border-0 shadow-sm"><div class="card-body"><h4>{{ stats.rejected }}</h4><p class="mb-0">Rejected</p></div></div></div>
+    <div class="col-md-3 mb-3"><div class="card text-center text-dark bg-warning border-0 shadow-sm"><div class="card-body"><h4>{{ stats.pending }}</h4><p class="mb-0">Pending</p></div></div></div>
+</div>
+
+<div class="card shadow border-0 mt-3">
+    <div class="card-header bg-primary text-white font-weight-bold">My Applications</div>
+    <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+        {% for app in applications %}
+        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+            <div>
+                <strong>{{ app.internship.title }}</strong> <span class="text-muted">at {{ app.internship.company }}</span><br>
+                <small class="text-muted">Applied on: {{ app.created_at|date }}</small>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge {% if app.status == 'Accepted' %}bg-success{% elif app.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %}">{{ app.status }}</span>
+                <a href="{% url 'edit_application' app.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="{% url 'withdraw_application' app.pk %}" class="btn btn-sm btn-outline-danger">Withdraw</a>
+            </div>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">You have not applied to any internships yet.</li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3 text-center shadow-sm">
+    <h1 class="display-5 fw-bold">Welcome to InternVault</h1>
+    <p class="col-md-8 mx-auto fs-4">Find your dream internship today or post opportunities to hire the best talent.</p>
+    {% if not user.is_authenticated %}
+        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg px-4 me-md-2">Get Started</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-lg px-4">Login</a>
+    {% endif %}
+</div>
+{% if featured_internships %}
+<div class="row mt-5">
+    <h3 class="mb-4 text-center">Featured Internships</h3>
+    {% for internship in featured_internships %}
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ internship.title }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ internship.company }}</h6>
+                <p class="card-text">{{ internship.description|truncatewords:20 }}</p>
+                <div class="text-muted small">Deadline: {{ internship.deadline }}</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

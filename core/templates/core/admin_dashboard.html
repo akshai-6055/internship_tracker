@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Admin Dashboard</h2>
+    <a href="{% url 'create_internship' %}" class="btn btn-success">+ Create Internship</a>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow border-0">
+            <div class="card-header bg-primary text-white font-weight-bold">Internship Listings</div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for internship in internships %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <div>
+                            <strong>{{ internship.title }}</strong><br>
+                            <span class="text-muted">{{ internship.company }}</span>
+                            <div class="small text-danger mt-1">Deadline: {{ internship.deadline }}</div>
+                        </div>
+                        <div class="d-flex flex-column gap-2">
+                            <a href="{% url 'edit_internship' internship.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{% url 'delete_internship' internship.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <div class="p-3 text-muted">No internships active.</div>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow border-0">
+            <div class="card-header bg-info text-dark font-weight-bold">User Applications</div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for app in applications %}
+                    <li class="list-group-item p-3">
+                        <div>
+                            <strong>{{ app.user.username }}</strong> applied to <strong>{{ app.internship.title }}</strong>
+                        </div>
+                        <div class="small text-muted mt-1">Status: <span class="badge bg-secondary">{{ app.status }}</span></div>
+                        <form method="post" action="{% url 'update_application_status' app.pk %}" class="mt-2 text-start">
+                            {% csrf_token %}
+                            <div class="input-group input-group-sm">
+                                <select name="status" class="form-select">
+                                    {% if app.status == 'Applied' %}
+                                    <option value="Applied" selected hidden>Applied</option>
+                                    {% endif %}
+                                    <option value="Pending" {% if app.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="Accepted" {% if app.status == 'Accepted' %}selected{% endif %}>Accepted</option>
+                                    <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary">Update</button>
+                            </div>
+                        </form>
+                    </li>
+                    {% empty %}
+                    <div class="p-3 text-muted">No applications found.</div>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
