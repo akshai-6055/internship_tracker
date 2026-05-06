@@ -1,1 +1,3 @@
-# portal_project package initialization
+import pymysql
+
+pymysql.install_as_MySQLdb()

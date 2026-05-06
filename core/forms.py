@@ -9,9 +9,11 @@ class CustomAuthenticationForm(AuthenticationForm):
             field.widget.attrs['class'] = 'form-control'
 
 class CustomUserCreationForm(UserCreationForm):
+    role = forms.ChoiceField(choices=User.ROLE_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}))
+
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = UserCreationForm.Meta.fields + ('role',)
+        fields = UserCreationForm.Meta.fields + ('role', 'company_name')
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,7 +26,19 @@ class CustomUserCreationForm(UserCreationForm):
 class InternshipForm(forms.ModelForm):
     class Meta:
         model = Internship
-        fields = ['title', 'company', 'deadline', 'description', 'requirements']
+        fields = ['title', 'company', 'deadline', 'duration', 'description', 'requirements']
+        widgets = {
+            'deadline': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
+
+class EmployerInternshipForm(forms.ModelForm):
+    class Meta:
+        model = Internship
+        fields = ['title', 'company', 'deadline', 'duration', 'description', 'requirements']
         widgets = {
             'deadline': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }

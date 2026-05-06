@@ -6,13 +6,13 @@ from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.urls import reverse
 
-from .forms import CustomUserCreationForm, InternshipForm, ApplicationForm, CustomAuthenticationForm
-from .models import Internship, Application
+from .forms import CustomUserCreationForm, InternshipForm, ApplicationForm, CustomAuthenticationForm, EmployerInternshipForm
+from .models import User, Internship, Application
 
 
 # 🔹 Landing Page
 def landing_page(request):
-    featured_internships = Internship.objects.all().order_by('-created_at')[:3]
+    featured_internships = Internship.objects.filter(is_approved=True).order_by('-created_at')[:3]
     return render(request, 'core/landing.html', {'featured_internships': featured_internships})
 
 
@@ -27,6 +27,8 @@ def user_signup(request):
 
             if user.is_admin:
                 return redirect('admin_dashboard')
+            elif user.is_employer:
+                return redirect('employer_dashboard')
             return redirect('student_dashboard')
     else:
         form = CustomUserCreationForm()
@@ -36,7 +38,7 @@ def user_signup(request):
 
 # 🔹 Login (WITH ROLE SUPPORT 🔥)
 def user_login(request):
-    user_type = request.GET.get('type')  # admin / student
+    user_type = request.GET.get('type')  # admin / student / employer
 
     if request.method == 'POST':
         form = CustomAuthenticationForm(request, data=request.POST)
@@ -51,12 +53,18 @@ def user_login(request):
             if user_type == 'student' and not user.is_student:
                 messages.error(request, "You are not a student!")
                 return redirect(f"{reverse('login')}?type=student")
+            
+            if user_type == 'employer' and not user.is_employer:
+                messages.error(request, "You are not an employer!")
+                return redirect(f"{reverse('login')}?type=employer")
 
             login(request, user)
             messages.success(request, "Logged in successfully!")
 
             if user.is_admin:
                 return redirect('admin_dashboard')
+            elif user.is_employer:
+                return redirect('employer_dashboard')
             return redirect('student_dashboard')
 
     else:
@@ -105,17 +113,44 @@ def student_required(view_func):
     return wrapper
 
 
+def employer_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_employer:
+            raise PermissionDenied
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
 # ================= ADMIN ================= #
 
 @admin_required
 def admin_dashboard(request):
-    internships = Internship.objects.all()
+    internships = Internship.objects.all().order_by('-created_at')
     applications = Application.objects.select_related('user', 'internship').all()
+    
+    # Stats
+    students_count = User.objects.filter(role='student').count()
+    employers = User.objects.filter(role='employer')
+    employers_count = employers.count()
+    pending_count = internships.filter(is_approved=False).count()
 
     return render(request, 'core/admin_dashboard.html', {
         'internships': internships,
-        'applications': applications
+        'applications': applications,
+        'students_count': students_count,
+        'employers_count': employers_count,
+        'employers': employers,
+        'pending_count': pending_count
     })
+
+
+@admin_required
+def approve_internship(request, pk):
+    internship = get_object_or_404(Internship, pk=pk)
+    internship.is_approved = True
+    internship.save()
+    messages.success(request, f"Internship '{internship.title}' has been approved!")
+    return redirect('admin_dashboard')
 
 
 @admin_required
@@ -123,7 +158,9 @@ def create_internship(request):
     if request.method == 'POST':
         form = InternshipForm(request.POST)
         if form.is_valid():
-            form.save()
+            internship = form.save(commit=False)
+            internship.is_approved = True # Admin created internships are approved by default
+            internship.save()
             messages.success(request, "Internship created successfully!")
             return redirect('admin_dashboard')
     else:
@@ -208,13 +245,13 @@ def student_dashboard(request):
 
 @student_required
 def student_internships(request):
-    internships = Internship.objects.all()
+    internships = Internship.objects.filter(is_approved=True)
     return render(request, 'core/student_internships.html', {'internships': internships})
 
 
 @student_required
 def apply_internship(request, pk):
-    internship = get_object_or_404(Internship, pk=pk)
+    internship = get_object_or_404(Internship, pk=pk, is_approved=True)
 
     if Application.objects.filter(user=request.user, internship=internship).exists():
         messages.error(request, "You have already applied for this internship.")
@@ -279,3 +316,87 @@ def withdraw_application(request, pk):
         'object': application,
         'url': 'student_dashboard'
     })
+
+
+# ================= EMPLOYER ================= #
+
+@employer_required
+def employer_dashboard(request):
+    internships = Internship.objects.filter(employer=request.user)
+    applications = Application.objects.select_related('user', 'internship').filter(internship__employer=request.user)
+
+    return render(request, 'core/employer_dashboard.html', {
+        'internships': internships,
+        'applications': applications
+    })
+
+
+@employer_required
+def employer_create_internship(request):
+    if request.method == 'POST':
+        form = EmployerInternshipForm(request.POST)
+        if form.is_valid():
+            internship = form.save(commit=False)
+            internship.employer = request.user
+            internship.is_approved = False # Needs admin approval
+            internship.save()
+            messages.success(request, "Internship submitted for admin approval!")
+            return redirect('employer_dashboard')
+    else:
+        form = EmployerInternshipForm()
+
+    return render(request, 'core/internship_form.html', {
+        'form': form,
+        'title': 'Create Internship (Employer)'
+    })
+
+
+@employer_required
+def employer_edit_internship(request, pk):
+    internship = get_object_or_404(Internship, pk=pk, employer=request.user)
+
+    if request.method == 'POST':
+        form = EmployerInternshipForm(request.POST, instance=internship)
+        if form.is_valid():
+            internship = form.save(commit=False)
+            internship.is_approved = False # Re-approval needed if edited
+            internship.save()
+            messages.success(request, "Internship updated and sent for re-approval!")
+            return redirect('employer_dashboard')
+    else:
+        form = EmployerInternshipForm(instance=internship)
+
+    return render(request, 'core/internship_form.html', {
+        'form': form,
+        'title': 'Edit Internship'
+    })
+
+
+@employer_required
+def employer_delete_internship(request, pk):
+    internship = get_object_or_404(Internship, pk=pk, employer=request.user)
+
+    if request.method == 'POST':
+        internship.delete()
+        messages.success(request, "Internship deleted successfully!")
+        return redirect('employer_dashboard')
+
+    return render(request, 'core/confirm_delete.html', {
+        'object': internship,
+        'url': 'employer_dashboard'
+    })
+
+
+@employer_required
+def employer_update_application_status(request, pk):
+    application = get_object_or_404(Application, pk=pk, internship__employer=request.user)
+
+    if request.method == 'POST':
+        status = request.POST.get('status')
+
+        if status in dict(Application.STATUS_CHOICES):
+            application.status = status
+            application.save()
+            messages.success(request, "Application status updated!")
+
+    return redirect('employer_dashboard')

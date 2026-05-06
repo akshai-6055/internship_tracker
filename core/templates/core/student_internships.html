@@ -1,23 +1,60 @@
 {% extends 'base.html' %}
+
+{% block title %}Explore Internships | InternVault{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">Available Internships</h2>
-<div class="row">
-    {% for internship in internships %}
-    <div class="col-md-4 mb-4">
-        <div class="card shadow border-0 h-100">
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title">{{ internship.title }}</h5>
-                <h6 class="card-subtitle mb-3 text-muted">{{ internship.company }}</h6>
-                <p class="card-text flex-grow-1">{{ internship.description|truncatewords:20 }}</p>
-                <div class="mt-auto">
-                    <p class="card-text small text-danger fw-bold">Deadline: {{ internship.deadline }}</p>
-                    <a href="{% url 'apply_internship' internship.pk %}" class="btn btn-outline-primary w-100">Apply Now</a>
+<div class="animate-fade-in">
+    <div class="mb-5 text-center">
+        <h1 class="fw-bold mb-2">Available Opportunities</h1>
+        <p class="text-secondary">Find and apply to verified internships tailored for your growth</p>
+    </div>
+
+    <div class="row g-4">
+        {% for internship in internships %}
+        <div class="col-md-6 col-lg-4">
+            <div class="premium-card h-100 p-4 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="bg-primary bg-opacity-10 p-2 rounded-3">
+                        <i class="fas fa-briefcase text-primary"></i>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-light text-dark border smaller">
+                            <i class="far fa-clock me-1"></i>{{ internship.deadline }}
+                        </span>
+                        {% if internship.duration %}
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 smaller">
+                            <i class="fas fa-hourglass-half me-1"></i>{{ internship.duration }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <h5 class="fw-bold mb-1">{{ internship.title }}</h5>
+                <h6 class="text-primary small mb-3 fw-bold">{{ internship.company }}</h6>
+                
+                <p class="text-secondary small flex-grow-1 mb-4">
+                    {{ internship.description|truncatewords:25 }}
+                </p>
+
+                <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                    <div class="text-secondary smaller">
+                        <i class="fas fa-map-marker-alt me-1"></i> Remote / On-site
+                    </div>
+                    <a href="{% url 'apply_internship' internship.pk %}" class="btn btn-primary btn-sm px-4 rounded-pill">
+                        View Details
+                    </a>
                 </div>
             </div>
         </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="premium-card p-5 d-inline-block">
+                <i class="fas fa-search fa-3x text-secondary mb-3 opacity-20"></i>
+                <h4 class="text-dark">No Internships Found</h4>
+                <p class="text-secondary mb-0">Check back later for new opportunities.</p>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    {% empty %}
-    <div class="col-12"><p class="text-muted">No internships available right now.</p></div>
-    {% endfor %}
 </div>
 {% endblock %}

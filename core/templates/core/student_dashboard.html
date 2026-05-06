@@ -1,41 +1,146 @@
 {% extends 'base.html' %}
+
+{% block title %}My Career Dashboard | InternVault{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Student Dashboard</h2>
-    <a href="{% url 'student_internships' %}" class="btn btn-success">Browse Internships</a>
-    <!--<div class="mt-5 text-end">-->
-    <a href="{% url 'delete_account' %}" class="btn btn-link text-danger">Delete Account</a>
+<div class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold mb-1">Student Dashboard</h1>
+            <p class="text-secondary">Track your applications and discover new opportunities</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'student_internships' %}" class="btn btn-primary shadow-sm">
+                <i class="fas fa-search me-2"></i>Browse Internships
+            </a>
+            <a href="{% url 'delete_account' %}" class="btn btn-outline-danger btn-sm d-flex align-items-center">
+                <i class="fas fa-user-minus me-1"></i>
+            </a>
+        </div>
+    </div>
 
-</div>
-
-<div class="row">
-    <div class="col-md-3 mb-3"><div class="card text-center border-0 shadow-sm"><div class="card-body"><h4>{{ stats.total }}</h4><p class="mb-0 text-muted">Total Applied</p></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card text-center text-white bg-success border-0 shadow-sm"><div class="card-body"><h4>{{ stats.accepted }}</h4><p class="mb-0">Accepted</p></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card text-center text-white bg-danger border-0 shadow-sm"><div class="card-body"><h4>{{ stats.rejected }}</h4><p class="mb-0">Rejected</p></div></div></div>
-    <div class="col-md-3 mb-3"><div class="card text-center text-dark bg-warning border-0 shadow-sm"><div class="card-body"><h4>{{ stats.pending }}</h4><p class="mb-0">Pending</p></div></div></div>
-</div>
-
-<div class="card shadow border-0 mt-3">
-    <div class="card-header bg-primary text-white font-weight-bold">My Applications</div>
-    <div class="card-body p-0">
-        <ul class="list-group list-group-flush">
-        {% for app in applications %}
-        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-            <div>
-                <strong>{{ app.internship.title }}</strong> <span class="text-muted">at {{ app.internship.company }}</span><br>
-                <small class="text-muted">Applied on: {{ app.created_at|date }}</small>
+    <!-- 🔹 Quick Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="premium-card p-4 text-center">
+                <h6 class="text-secondary small fw-bold text-uppercase mb-2">Total Applied</h6>
+                <h2 class="fw-bold mb-0 text-primary">{{ stats.total }}</h2>
             </div>
-            <div class="d-flex align-items-center gap-3">
-                <span class="badge {% if app.status == 'Accepted' %}bg-success{% elif app.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %}">{{ app.status }}</span>
-                <a href="{% url 'edit_application' app.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
-                <a href="{% url 'withdraw_application' app.pk %}" class="btn btn-sm btn-outline-danger">Withdraw</a>
+        </div>
+        <div class="col-md-3">
+            <div class="premium-card p-4 text-center border-bottom border-success border-4">
+                <h6 class="text-secondary small fw-bold text-uppercase mb-2">Accepted</h6>
+                <h2 class="fw-bold mb-0 text-success">{{ stats.accepted }}</h2>
             </div>
-        </li>
-        {% empty %}
-        <li class="list-group-item text-muted">You have not applied to any internships yet.</li>
-        {% endfor %}
-        </ul>
+        </div>
+        <div class="col-md-3">
+            <div class="premium-card p-4 text-center border-bottom border-danger border-4">
+                <h6 class="text-secondary small fw-bold text-uppercase mb-2">Rejected</h6>
+                <h2 class="fw-bold mb-0 text-danger">{{ stats.rejected }}</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="premium-card p-4 text-center border-bottom border-warning border-4">
+                <h6 class="text-secondary small fw-bold text-uppercase mb-2">Pending</h6>
+                <h2 class="fw-bold mb-0 text-warning">{{ stats.pending }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔹 My Applications List -->
+    <div class="premium-card">
+        <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-file-alt me-2"></i>My Applications</h5>
+            <span class="text-secondary small">{{ applications.count }} Total</span>
+        </div>
+        <div class="p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Position & Company</th>
+                            <th>Applied On</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in applications %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold">{{ app.internship.title }}</div>
+                                <div class="small text-primary">{{ app.internship.company }}</div>
+                            </td>
+                            <td><span class="text-secondary small">{{ app.created_at|date:"M d, Y" }}</span></td>
+                            <td>
+                                <span class="badge 
+                                    {% if app.status == 'Accepted' %}bg-success
+                                    {% elif app.status == 'Rejected' %}bg-danger
+                                    {% else %}bg-info{% endif %} 
+                                    bg-opacity-10 
+                                    {% if app.status == 'Accepted' %}text-success
+                                    {% elif app.status == 'Rejected' %}text-danger
+                                    {% else %}text-info{% endif %} 
+                                    border 
+                                    {% if app.status == 'Accepted' %}border-success
+                                    {% elif app.status == 'Rejected' %}border-danger
+                                    {% else %}border-info{% endif %} 
+                                    border-opacity-25">
+                                    {{ app.status }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a href="{% url 'edit_application' app.pk %}" class="btn btn-sm btn-outline-primary {% if app.status == 'Accepted' or app.status == 'Rejected' %}disabled{% endif %}">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'withdraw_application' app.pk %}" style="display: inline;" onsubmit="return confirmWithdraw(event)">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5">
+                                <i class="fas fa-clipboard-list fa-3x text-secondary mb-3 opacity-20"></i>
+                                <p class="text-secondary">You haven't applied to any internships yet.</p>
+                                <a href="{% url 'student_internships' %}" class="btn btn-outline-primary btn-sm mt-2">Find Internships</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
+{% block extra_js %}
+<script>
+function confirmWithdraw(event) {
+    event.preventDefault();
+    const form = event.target;
+    Swal.fire({
+        title: 'Withdraw Application?',
+        text: "Are you sure you want to withdraw your application? This action cannot be undone.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, withdraw',
+        background: '#ffffff',
+        color: '#212529'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+    return false;
+}
+</script>
+{% endblock %}
 {% endblock %}

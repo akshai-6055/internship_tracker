@@ -5,8 +5,10 @@ class User(AbstractUser):
     ROLE_CHOICES = (
         ('student', 'Student'),
         ('admin', 'Admin'),
+        ('employer', 'Employer'),
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
+    company_name = models.CharField(max_length=200, blank=True, null=True)
     
     @property
     def is_student(self):
@@ -16,12 +18,19 @@ class User(AbstractUser):
     def is_admin(self):
         return self.role == 'admin'
 
+    @property
+    def is_employer(self):
+        return self.role == 'employer'
+
 class Internship(models.Model):
     title = models.CharField(max_length=200)
     company = models.CharField(max_length=200)
     deadline = models.DateField()
+    duration = models.CharField(max_length=100, blank=True, null=True)
     description = models.TextField()
     requirements = models.TextField(blank=True, null=True)
+    employer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={'role': 'employer'}, related_name='posted_internships')
+    is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

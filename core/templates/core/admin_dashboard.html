@@ -1,64 +1,238 @@
 {% extends 'base.html' %}
+
+{% block title %}Admin Control Center | InternVault{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Admin Dashboard</h2>
-    <a href="{% url 'create_internship' %}" class="btn btn-success">+ Create Internship</a>
-</div>
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card shadow border-0">
-            <div class="card-header bg-primary text-white font-weight-bold">Internship Listings</div>
-            <div class="card-body p-0">
-                <ul class="list-group list-group-flush">
-                    {% for internship in internships %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-                        <div>
-                            <strong>{{ internship.title }}</strong><br>
-                            <span class="text-muted">{{ internship.company }}</span>
-                            <div class="small text-danger mt-1">Deadline: {{ internship.deadline }}</div>
-                        </div>
-                        <div class="d-flex flex-column gap-2">
-                            <a href="{% url 'edit_internship' internship.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <a href="{% url 'delete_internship' internship.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
-                        </div>
-                    </li>
-                    {% empty %}
-                    <div class="p-3 text-muted">No internships active.</div>
-                    {% endfor %}
-                </ul>
+<div class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold mb-1">System Oversight</h1>
+            <p class="text-secondary">Global management and moderation hub</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'create_internship' %}" class="btn btn-primary shadow-sm">
+                <i class="fas fa-plus me-2"></i>New Internship
+            </a>
+            <a href="{% url 'delete_account' %}" class="btn btn-outline-danger btn-sm d-flex align-items-center" title="Delete Account">
+                <i class="fas fa-user-minus"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- 🔹 Quick Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="premium-card p-4 border-start border-primary border-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                        <i class="fas fa-user-graduate text-primary fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-secondary small fw-bold text-uppercase mb-1">Students</h6>
+                        <h3 class="fw-bold mb-0 text-dark">{{ students_count }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="premium-card p-4 border-start border-info border-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-info bg-opacity-10 p-3 rounded-3 me-3">
+                        <i class="fas fa-building text-info fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-secondary small fw-bold text-uppercase mb-1">Employers</h6>
+                        <h3 class="fw-bold mb-0 text-dark">{{ employers_count }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="premium-card p-4 border-start border-warning border-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-10 p-3 rounded-3 me-3">
+                        <i class="fas fa-clock text-warning fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-secondary small fw-bold text-uppercase mb-1">Pending</h6>
+                        <h3 class="fw-bold mb-0 text-dark">{{ pending_count }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="premium-card p-4 border-start border-success border-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-3 me-3">
+                        <i class="fas fa-file-signature text-success fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-secondary small fw-bold text-uppercase mb-1">Apps</h6>
+                        <h3 class="fw-bold mb-0 text-dark">{{ applications.count }}</h3>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-6 mb-4">
-        <div class="card shadow border-0">
-            <div class="card-header bg-info text-dark font-weight-bold">User Applications</div>
-            <div class="card-body p-0">
-                <ul class="list-group list-group-flush">
-                    {% for app in applications %}
-                    <li class="list-group-item p-3">
-                        <div>
-                            <strong>{{ app.user.username }}</strong> applied to <strong>{{ app.internship.title }}</strong>
-                        </div>
-                        <div class="small text-muted mt-1">Status: <span class="badge bg-secondary">{{ app.status }}</span></div>
-                        <form method="post" action="{% url 'update_application_status' app.pk %}" class="mt-2 text-start">
-                            {% csrf_token %}
-                            <div class="input-group input-group-sm">
-                                <select name="status" class="form-select">
-                                    {% if app.status == 'Applied' %}
-                                    <option value="Applied" selected hidden>Applied</option>
+
+    <div class="row g-4">
+        <!-- 🔹 Moderation Queue -->
+        <div class="col-lg-8">
+            <div class="premium-card mb-4">
+                <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-tasks me-2 text-warning"></i>Moderation Queue</h5>
+                    <span class="badge bg-warning text-dark">Action Required</span>
+                </div>
+                <div class="p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Position</th>
+                                    <th>Employer</th>
+                                    <th>Deadline</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for internship in internships %}
+                                    {% if not internship.is_approved %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold">{{ internship.title }}</div>
+                                            <div class="small text-secondary">{{ internship.company }}</div>
+                                            {% if internship.duration %}
+                                            <div class="smaller text-primary mt-1"><i class="fas fa-hourglass-half me-1"></i>{{ internship.duration }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">
+                                                {{ internship.employer.username|default:"System" }}
+                                            </span>
+                                        </td>
+                                        <td><span class="text-secondary">{{ internship.deadline }}</span></td>
+                                        <td class="text-end pe-4">
+                                            <div class="btn-group">
+                                                <a href="{% url 'approve_internship' internship.pk %}" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                <a href="{% url 'edit_internship' internship.pk %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'delete_internship' internship.pk %}" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
                                     {% endif %}
-                                    <option value="Pending" {% if app.status == 'Pending' %}selected{% endif %}>Pending</option>
-                                    <option value="Accepted" {% if app.status == 'Accepted' %}selected{% endif %}>Accepted</option>
-                                    <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
-                                </select>
-                                <button type="submit" class="btn btn-primary">Update</button>
-                            </div>
-                        </form>
-                    </li>
+                                {% empty %}
+                                    <tr><td colspan="4" class="text-center py-4 text-secondary">No pending internships.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🔹 All Internships -->
+            <div class="premium-card">
+                <div class="p-4 border-bottom">
+                    <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-list me-2"></i>All Listings</h5>
+                </div>
+                <div class="p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Internship</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-4">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for internship in internships %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold">{{ internship.title }}</div>
+                                        <div class="small text-secondary">{{ internship.company }}</div>
+                                    </td>
+                                    <td>
+                                        {% if internship.is_approved %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Live</span>
+                                        {% else %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="{% url 'edit_internship' internship.pk %}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-cog"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔹 Side Panels -->
+        <div class="col-lg-4">
+            <!-- 🔹 User Directory -->
+            <div class="premium-card mb-4">
+                <div class="p-4 border-bottom">
+                    <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-users me-2"></i>Employers</h5>
+                </div>
+                <div class="p-4">
+                    {% for employer in employers %}
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                            <i class="fas fa-building text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold small">{{ employer.company_name|default:employer.username }}</div>
+                            <div class="text-secondary smaller">@{{ employer.username }}</div>
+                        </div>
+                    </div>
                     {% empty %}
-                    <div class="p-3 text-muted">No applications found.</div>
+                    <p class="text-secondary small">No employers found.</p>
                     {% endfor %}
-                </ul>
+                </div>
+            </div>
+
+            <!-- 🔹 Recent Applications -->
+            <div class="premium-card">
+                <div class="p-4 border-bottom">
+                    <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-paper-plane me-2"></i>Recent Applications</h5>
+                </div>
+                <div class="p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for app in applications|slice:":5" %}
+                        <li class="list-group-item bg-transparent p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="fw-bold small">{{ app.user.username }}</span>
+                                <span class="badge bg-secondary text-white smaller">{{ app.status }}</span>
+                            </div>
+                            <div class="text-secondary smaller mb-2">Applied for {{ app.internship.title }}</div>
+                            <form method="post" action="{% url 'update_application_status' app.pk %}">
+                                {% csrf_token %}
+                                <div class="input-group input-group-sm">
+                                    <select name="status" class="form-select border-opacity-25">
+                                        {% for val, label in app.STATUS_CHOICES %}
+                                        <option value="{{ val }}" {% if app.status == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="btn btn-primary" type="submit">Update</button>
+                                </div>
+                            </form>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item bg-transparent text-secondary small p-4 text-center">No applications yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

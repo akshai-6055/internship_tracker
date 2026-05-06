@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Employer Dashboard | InternVault{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold mb-1">Employer Dashboard</h1>
+            <p class="text-secondary">Manage your opportunities and track applicants</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'employer_create_internship' %}" class="btn btn-primary shadow-sm">
+                <i class="fas fa-plus me-2"></i>Post New Role
+            </a>
+            <a href="{% url 'delete_account' %}" class="btn btn-outline-danger btn-sm d-flex align-items-center" title="Delete Account">
+                <i class="fas fa-user-minus"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- 🔹 My Internship Listings -->
+        <div class="col-lg-7">
+            <div class="premium-card mb-4">
+                <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-briefcase me-2"></i>My Listings</h5>
+                    <span class="badge bg-primary bg-opacity-10 text-primary">{{ internships.count }} Active</span>
+                </div>
+                <div class="p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for internship in internships %}
+                        <li class="list-group-item bg-transparent p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <h5 class="fw-bold mb-0 me-2">{{ internship.title }}</h5>
+                                        {% if internship.is_approved %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 small">Approved</span>
+                                        {% else %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 small">Pending Approval</span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="text-secondary small mb-2"><i class="fas fa-building me-1"></i>{{ internship.company }}</p>
+                                    {% if internship.duration %}
+                                    <p class="text-primary small mb-2"><i class="fas fa-hourglass-half me-1"></i>Duration: {{ internship.duration }}</p>
+                                    {% endif %}
+                                    <div class="text-danger small"><i class="far fa-calendar-times me-1"></i>Deadline: {{ internship.deadline }}</div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'employer_edit_internship' internship.pk %}" class="btn btn-sm btn-outline-primary rounded-3">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'employer_delete_internship' internship.pk %}" style="display: inline;" onsubmit="return confirmDelete(event)">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-3">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <div class="p-5 text-center">
+                            <i class="fas fa-folder-open fa-3x text-secondary mb-3 opacity-20"></i>
+                            <p class="text-secondary">You haven't posted any internships yet.</p>
+                            <a href="{% url 'employer_create_internship' %}" class="btn btn-outline-primary btn-sm mt-2">Post your first role</a>
+                        </div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔹 Applications for My Roles -->
+        <div class="col-lg-5">
+            <div class="premium-card">
+                <div class="p-4 border-bottom">
+                    <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-user-tie me-2 text-info"></i>Applicants</h5>
+                </div>
+                <div class="p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for app in applications %}
+                        <li class="list-group-item bg-transparent p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                                    <i class="fas fa-user text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ app.user.username }}</div>
+                                    <div class="text-secondary small">applied for <span class="text-primary fw-bold">{{ app.internship.title }}</span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <span class="text-secondary small fw-bold text-uppercase">Status:</span>
+                                <span class="badge {% if app.status == 'Accepted' %}bg-success{% elif app.status == 'Rejected' %}bg-danger{% else %}bg-info{% endif %} bg-opacity-10 {% if app.status == 'Accepted' %}text-success{% elif app.status == 'Rejected' %}text-danger{% else %}text-info{% endif %} ms-2">
+                                    {{ app.status }}
+                                </span>
+                            </div>
+
+                            <form method="post" action="{% url 'employer_update_application_status' app.pk %}">
+                                {% csrf_token %}
+                                <div class="input-group input-group-sm">
+                                    <select name="status" class="form-select border-opacity-25">
+                                        {% for val, label in app.STATUS_CHOICES %}
+                                        <option value="{{ val }}" {% if app.status == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                </div>
+                            </form>
+                        </li>
+                        {% empty %}
+                        <div class="p-5 text-center">
+                            <i class="fas fa-inbox fa-3x text-secondary mb-3 opacity-20"></i>
+                            <p class="text-secondary">No applications received yet.</p>
+                        </div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function confirmDelete(event) {
+    event.preventDefault();
+    const form = event.target;
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This internship listing will be permanently deleted!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!',
+        background: '#ffffff',
+        color: '#212529'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+    return false;
+}
+</script>
+{% endblock %}
+{% endblock %}

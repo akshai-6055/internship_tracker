@@ -1,150 +1,294 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Internship Portal</title>
 
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="InternVault - Premium Internship Management System for Students, Employers, and Admins." />
+  <title>{% block title %}InternVault | Role-Based Internship Portal{% endblock %}</title>
 
-    <style>
-      body {
-        font-family: "Inter", sans-serif;
-        background-color: #f8f9fa;
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --primary-blue: #0d6efd;
+      --header-bg: #0d6efd;
+      --footer-bg: #0d6efd;
+      --bg-color: #ffffff;
+      --card-bg: #ffffff;
+      --card-border: #e0e0e0;
+      --text-primary: #212529;
+      --text-secondary: #6c757d;
+      --text-white: #ffffff;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .navbar-brand {
+      font-family: 'Outfit', sans-serif;
+      color: white;
+    }
+
+    .glass-card,
+    .premium-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-card:hover,
+    .premium-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar {
+      background-color: var(--header-bg) !important;
+      padding: 0.8rem 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      /* color: white; */
+      color: var(--text-white) !important;
+    }
+
+    .nav-link {
+      color: rgba(255, 255, 255, 0.9) !important;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--text-white) !important;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      color: var(--text-white);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+    }
+
+    .footer {
+      background-color: var(--footer-bg);
+      color: var(--text-white);
+      padding: 1.5rem 0;
+      margin-top: auto;
+    }
+
+    .footer a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer a:hover {
+      color: var(--text-white);
+    }
+
+    /* Custom Table Styling */
+    .table {
+      color: var(--text-primary);
+    }
+
+    .table thead th {
+      background: #f8f9fa;
+      border-bottom: 2px solid var(--card-border);
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .table td {
+      border-bottom: 1px solid var(--card-border);
+      vertical-align: middle;
+    }
+
+    .badge {
+      padding: 0.5em 0.8em;
+      border-radius: 6px;
+    }
+
+    /* Form Styling */
+    .form-control {
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      padding: 0.75rem 1rem;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
       }
-      .navbar-brand {
-        font-weight: bold;
-        color: white !important;
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
-      html, body {
-  height: 100%;
-}
+    }
 
-body {
-  display: flex;
-  flex-direction: column;
-}
-    </style>
-  </head>
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+  </style>
+</head>
 
-  <body>
-    <!-- 🔹 Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container">
-        <a class="navbar-brand" href="{% url 'landing_page' %}">InternVault</a>
+<body>
+  <!-- 🔹 Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'landing_page' %}">
+        <i class="fas fa-vault me-2" style="color: white;"></i>InternVault
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-        <div class="collapse navbar-collapse">
-          <ul class="navbar-nav ms-auto">
-            {% if user.is_authenticated %} {% if user.is_admin %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'admin_dashboard' %}"
-                >Dashboard</a
-              >
-            </li>
-            {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'student_dashboard' %}"
-                >Dashboard</a
-              >
-            </li>
-            {% endif %}
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <span class="nav-link text-white me-3">
+              <i class="fas fa-user-circle me-1"></i>{{ user.username }}
+              <small class="badge bg-secondary ms-1">{{ user.role|title }}</small>
+            </span>
+          </li>
+          {% if user.is_admin %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'admin_dashboard' %}">Dashboard</a>
+          </li>
+          {% elif user.is_employer %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'employer_dashboard' %}">Dashboard</a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'student_dashboard' %}">Dashboard</a>
+          </li>
+          {% endif %}
 
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-            </li>
+          <li class="nav-item ms-lg-3">
+            <a class="btn btn-outline-light btn-sm px-3" href="{% url 'logout' %}">
+              <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+          </li>
 
-            {% else %}
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle d-flex align-items-center"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-              >
-                <!-- Avatar Icon -->
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                  alt="profile"
-                  width="30"
-                  height="30"
-                  class="rounded-circle me-2"
-                />
-
-                
-              </a>
-
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                  <a class="dropdown-item" href="{% url 'login' %}?type=admin">
-                    Admin Login
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="{% url 'login' %}?type=student"
-                  >
-                    Student Login
-                  </a>
-                </li>
-
-                <li><hr class="dropdown-divider" /></li>
-
-                <li>
-                  <a class="dropdown-item" href="{% url 'signup' %}">
-                    Sign Up
-                  </a>
-                </li>
-              </ul>
-            </li>
-            {% endif %}
-          </ul>
-        </div>
+          {% else %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle btn btn-primary text-white px-4" href="#" role="button"
+              data-bs-toggle="dropdown">
+              Login / Join
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end glass-card mt-2">
+              <li><a class="dropdown-item py-2" href="{% url 'login' %}?type=student">Student Login</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'login' %}?type=employer">Employer Login</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'login' %}?type=admin">Admin Login</a></li>
+              <li>
+                <hr class="dropdown-divider bg-secondary">
+              </li>
+              <li><a class="dropdown-item py-2 fw-bold text-primary" href="{% url 'signup' %}">Create New Account</a>
+              </li>
+            </ul>
+          </li>
+          {% endif %}
+        </ul>
       </div>
-    </nav>
-
-    <!-- 🔹 Page Content -->
-    <div class="container mt-4" style="flex-grow: 1;">
-      {% block content %}{% endblock %}
     </div>
+  </nav>
 
-    <!-- 🔹 Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- 🔹 Page Content -->
+  <main class="container mt-5 mb-5" style="flex-grow: 1;">
+    {% block content %}{% endblock %}
+  </main>
 
-    <!-- 🔹 SweetAlert2 (REQUIRED) -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- 🔹 Toast Messages -->
-    {% if messages %}
-    <script>
-      const Toast = Swal.mixin({
-        toast: true,
-        position: 'bottom-end',   // bottom-right
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.addEventListener('mouseenter', Swal.stopTimer)
-          toast.addEventListener('mouseleave', Swal.resumeTimer)
-        }
-      });
-
-      {% for message in messages %}
-        Toast.fire({
-          icon: '{{ message.tags }}',
-          title: '{{ message }}'
-        });
-      {% endfor %}
-    </script>
-    {% endif %}
-    
   <!-- 🔹 Footer -->
-  <footer class="bg-primary text-white text-center py-3 mt-auto">
-    © 2026 InternVault. All rights reserved.
+  <footer class="footer">
+    <div class="container text-center">
+      <p class="mb-2">&copy; 2026 <strong>InternVault</strong>. All rights reserved.</p>
+      <div class="social-links">
+        <a href="#" class="text-secondary mx-2"><i class="fab fa-linkedin"></i></a>
+        <a href="#" class="text-secondary mx-2"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="text-secondary mx-2"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
   </footer>
-  </body>
+
+  <!-- 🔹 Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- 🔹 SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- 🔹 Toast Messages -->
+  {% if messages %}
+  <script>
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'bottom-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    });
+
+    {% for message in messages %}
+    Toast.fire({
+      icon: '{{ message.tags }}' === 'error' ? 'error' : ('{{ message.tags }}' === 'success' ? 'success' : 'info'),
+      title: '{{ message }}'
+    });
+    {% endfor %}
+  </script>
+  {% endif %}
+
+  {% block extra_js %}{% endblock %}
+</body>
+
 </html>

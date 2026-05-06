@@ -1,19 +1,82 @@
 {% extends 'base.html' %}
+
+{% block title %}Login | InternVault{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-body p-4">
-                <h3 class="card-title text-center mb-4 font-weight-bold">Login</h3>
-                <form method="post">
-                    {% csrf_token %}
+<div class="row justify-content-center align-items-center min-vh-75 animate-fade-in">
+    <div class="col-md-5">
+        <div class="premium-card p-5">
+            <div class="text-center mb-4">
+                <div class="display-6 fw-bold text-primary mb-2">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </div>
+                <p class="text-secondary">Welcome back! Please enter your details.</p>
+                {% if user_type %}
+                <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mt-2">
+                    Logging in as: <strong>{{ user_type|title }}</strong>
+                </div>
+                {% endif %}
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="login-form-fields">
                     {{ form.as_p }}
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Log In</button>
-                    </div>
-                </form>
+                </div>
+
+                <div class="d-grid gap-2 mt-5">
+                    <button type="submit" class="btn btn-primary py-3">
+                        Continue to Vault <i class="fas fa-chevron-right ms-2 small"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-4">
+                <p class="text-secondary small">
+                    Don't have an account? 
+                    <a href="{% url 'signup' %}" class="text-primary text-decoration-none fw-bold">Sign Up</a>
+                </p>
+                <hr class="opacity-10">
+                <a href="{% url 'landing_page' %}" class="text-secondary text-decoration-none small">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Home
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .login-form-fields p {
+        margin-bottom: 1.5rem;
+    }
+    .login-form-fields label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .form-control, input[type="text"], input[type="password"], input[type="email"], select, textarea {
+        background: #ffffff !important;
+        border: 1px solid #e0e0e0 !important;
+        color: #212529 !important;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        width: 100%;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-control:focus, input:focus, select:focus, textarea:focus {
+        border-color: var(--primary-blue) !important;
+        outline: none;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+        color: #dc3545;
+        font-size: 0.8rem;
+    }
+</style>
 {% endblock %}
