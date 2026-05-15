@@ -2,7 +2,7 @@
 
 InternVault is a premium, full-stack internship management system designed to bridge the gap between students seeking opportunities and employers looking for talent. Built with Django, it features a modern, responsive user interface with role-based access control for three distinct modules: Student, Employer, and Admin.
 
-## 🚀 Key Modules & Functionalities
+## Key Modules & Functionalities
 
 ### 1. Student (User) Module
 Designed for students to discover and apply for internship opportunities seamlessly.
@@ -35,7 +35,7 @@ Provides complete oversight and moderation of the entire platform.
 
 ---
 
-## ✨ Features & Technologies
+##  Features & Technologies
 
 - **Role-Based Access Control (RBAC):** Securely separated interfaces for Students, Employers, and Admins.
 - **Modern UI/UX:** A premium, dark-themed interface featuring glassmorphism aesthetics and responsive design.
@@ -44,7 +44,7 @@ Provides complete oversight and moderation of the entire platform.
 - **Database:** Uses **SQLite** (default) with support for MySQL/PostgreSQL.
 - **Frontend:** HTML5, CSS3 (Vanilla), and JavaScript with Google Fonts (Inter/Outfit).
 
-## 🛠️ Installation & Setup
+##  Installation & Setup
 
 1. **Clone the repository:**
    ```bash
